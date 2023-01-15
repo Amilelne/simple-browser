@@ -25,8 +25,8 @@ function renderLayoutBox(box) {
   const backgroundColor = get_color(box, 'background');
 
   const rect = new fabric.Rect({
-    originX: x,
-    originY: y,
+    left: x,
+    top: y,
     width,
     height,
     fill: backgroundColor ? backgroundColor : '#ff0000',

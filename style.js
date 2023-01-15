@@ -249,40 +249,6 @@ function get_color(layout_box, name) {
   return layout_box.node.value(name);
 }
 
-// function paint(box) {
-//   const canvas = createCanvas(120, 100);
-//   const ctx = canvas.getContext('2d');
-
-//   renderLayoutBox(ctx, box);
-
-//   fs.writeFileSync('out.png', canvas.toBuffer());
-// }
-
-// function renderLayoutBox(ctx, box) {
-//   renderBorderBox(ctx, box);
-//   box.children.forEach((child) => {
-//     renderLayoutBox(ctx, child);
-//   });
-// }
-
-// function renderBorderBox(ctx, box) {
-//   const dimensions = box.dimensions;
-//   const border_box = dimensions.border_box();
-//   const { x, y, height, width } = border_box;
-//   const borderColor = get_color(box, 'border');
-//   if (borderColor) {
-//     ctx.strokeStyle = borderColor;
-//   }
-//   ctx.strokeRect(x, y, width, height);
-
-//   const backgroundColor = get_color(box, 'background');
-//   if (backgroundColor) {
-//     ctx.fillStyle = backgroundColor;
-//     // const { x, y, height, width } = dimensions.padding_box();
-//     ctx.fillRect(x, y, width, height);
-//   }
-// }
-
 paint(root_box);
 
 module.exports = layout_tree;
