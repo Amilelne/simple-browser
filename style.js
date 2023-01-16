@@ -3,6 +3,8 @@ const htmlParser = require('./htmlParser/parse.js');
 const paint = require('./paint.js');
 const fs = require('fs');
 const { createCanvas } = require('canvas');
+const { Width, Height } = require('./const.js');
+
 
 const html = fs.readFileSync('index.html', 'utf-8');
 const css =
@@ -240,8 +242,8 @@ function layout_tree(node, containing_block) {
 
 
 const viewport = new Dimensions();
-viewport.content.width = 80;
-viewport.content.height = 60;
+viewport.content.width = Width;
+viewport.content.height = Height;
 
 const root_box = layout_tree(style_root[0], viewport);
 

@@ -1,8 +1,10 @@
 const { fabric } = require('fabric');
 const fs = require('fs');
-const out = fs.createWriteStream(__dirname + '/helloworld.png');
+const { Width, Height } = require('./const.js');
 
-const canvas = new fabric.Canvas(null, { width: 600, height: 600 });
+const out = fs.createWriteStream(__dirname + '/output/helloworld.png');
+
+const canvas = new fabric.Canvas(null, { width: Width, height: Height });
 
 function get_color(layout_box, name) {
   return layout_box.node.value(name);
@@ -24,15 +26,30 @@ function renderLayoutBox(box) {
   const borderColor = get_color(box, 'border');
   const backgroundColor = get_color(box, 'background');
 
+  console.log(x, y, width, height, borderColor, backgroundColor);
+
   const rect = new fabric.Rect({
     left: x,
     top: y,
     width,
     height,
-    fill: backgroundColor ? backgroundColor : '#ff0000',
-    borderColor: borderColor,
+    fill: backgroundColor ? backgroundColor : 'white',
+    stroke: borderColor,
+    strokeWidth: 2,
   });
   canvas.add(rect);
+
+  const node = box.node.node;
+  const { tagName, text } = node;
+  if (text) {
+    const Text = new fabric.Text(text, {
+      left: x,
+      top: y,
+      fill: '#000000',
+      fontSize: 20,
+    });
+    canvas.add(Text);
+  }
   box.children.forEach((child) => {
     renderLayoutBox(child);
   });
