@@ -1,0 +1,14 @@
+div {
+  padding: 2;
+  margin: 2;
+  border: red;
+}
+
+p {
+  height: 50;
+  padding: 2;
+  margin: 2;
+  border: yellow;
+  background: blue;
+  color: white;
+}

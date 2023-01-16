@@ -2,13 +2,10 @@ const cssParser = require('./cssParser/parse.js');
 const htmlParser = require('./htmlParser/parse.js');
 const paint = require('./paint.js');
 const fs = require('fs');
-const { createCanvas } = require('canvas');
 const { Width, Height } = require('./const.js');
 
-
-const html = fs.readFileSync('index.html', 'utf-8');
-const css =
-  'div {padding: 2; margin: 2;border: red;}  p {height: 50;padding: 2; margin: 2;border:yellow;background: blue;}';
+const html = fs.readFileSync('./input/index.html', 'utf-8');
+const css = fs.readFileSync('./input/main.css', 'utf-8');
 
 const htmlNode = htmlParser(html);
 const cssStyle = cssParser(css);
@@ -170,7 +167,7 @@ class LayoutBox {
       if (margin_left === 'auto') margin_left = 0;
       if (margin_right === 'auto') margin_right = 0;
 
-      if(underflow >= 0){
+      if (underflow >= 0) {
         width = underflow;
       } else {
         width = 0;
@@ -240,7 +237,6 @@ function layout_tree(node, containing_block) {
   return root_box;
 }
 
-
 const viewport = new Dimensions();
 viewport.content.width = Width;
 viewport.content.height = Height;
@@ -254,4 +250,3 @@ function get_color(layout_box, name) {
 paint(root_box);
 
 module.exports = layout_tree;
-
