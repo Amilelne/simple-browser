@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "canvas": "^2.10.2",
+    "css-layout": "^1.1.1",
     "fabric": "^5.3.0"
   }
 }

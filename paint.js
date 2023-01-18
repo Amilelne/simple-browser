@@ -25,9 +25,8 @@ function renderLayoutBox(box) {
   const { x, y, height, width } = border_box;
   const borderColor = get_specifiedValue(box, 'border') || 'none';
   const backgroundColor = get_specifiedValue(box, 'background') || 'white';
-  const color = get_specifiedValue(box, 'color') || 'black';
 
-  console.log(x, y, width, height, borderColor, backgroundColor, color);
+  console.log(x, y, width, height, borderColor, backgroundColor);
 
   const rect = new fabric.Rect({
     left: x,
@@ -40,20 +39,36 @@ function renderLayoutBox(box) {
   });
   canvas.add(rect);
 
-  const node = box.node.node;
-  const { tagName, text } = node;
-  if (text) {
-    const Text = new fabric.Text(text, {
-      left: x,
-      top: y,
-      fill: color,
-      fontSize: 20,
-    });
-    canvas.add(Text);
-  }
+  // 文本节点
+  renderTextBox(box);
+
+  // 子节点
   box.children.forEach((child) => {
     renderLayoutBox(child);
   });
+}
+
+function renderTextBox(box) {
+  const node = box.node.node;
+  const { tagName, text } = node;
+  if (!text) return;
+
+  const dimensions = box.dimensions;
+  const content_box = dimensions.content_box();
+  const { x, y, height, width } = content_box;
+  const color = get_specifiedValue(box, 'color') || 'black';
+
+  const Text = new fabric.Textbox(text, {
+    width,
+    left: x,
+    top: y,
+    fill: color,
+    fontSize: 20,
+    splitByGrapheme: true, // 中文换行
+  });
+  const textSize = Text.calcTextHeight();
+  console.log('textSize 2:', textSize);
+  canvas.add(Text);
 }
 
 module.exports = paint;

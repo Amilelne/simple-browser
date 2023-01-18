@@ -2,7 +2,8 @@ const cssParser = require('./cssParser/parse.js');
 const htmlParser = require('./htmlParser/parse.js');
 const paint = require('./paint.js');
 const fs = require('fs');
-const { Width, Height } = require('./const.js');
+const { Width, Height, LineHeight } = require('./const.js');
+const getTextHeight = require('./utils/getTextHeight');
 
 const html = fs.readFileSync('./input/index.html', 'utf-8');
 const css = fs.readFileSync('./input/main.css', 'utf-8');
@@ -70,6 +71,10 @@ class Dimensions {
     this.padding = padding;
     this.border = border;
     this.margin = margin;
+  }
+
+  content_box() {
+    return this.content;
   }
 
   padding_box() {
@@ -215,6 +220,13 @@ class LayoutBox {
 
   layout_block_children() {
     let d = this.dimensions;
+    const node = this.node.node;
+    // content area的height取决于内容的高度
+    const { text } = node;
+    if (text) {
+      const textHeight = getTextHeight(text, d.content.width);
+      d.content.height += textHeight;
+    }
     for (let child of this.children) {
       child.layout_block(d);
       d.content.height += child.dimensions.margin_box().height;
