@@ -1,6 +1,6 @@
 const endTag = /^<\/([a-zA-Z0-9\-]+)>/;
 const startTag = /^<([a-zA-Z0-9\-]+)(?:[ ]+([a-zA-Z0-9\-]+=[^>]+))*>/;
-const commentTag = /^<!\-\-[^(-->)]*\-\->/;
+const commentTag = /^<!--(.|\n)*-->/;
 const docTypeTag = /^<!doctype [^>]*>/i;
 const attributeTag = /^(?:[ ]+([a-zA-Z0-9\- ]+=[^> ]+))/;
 

@@ -14,7 +14,22 @@ const cssStyle = cssParser(css);
 console.log(htmlNode, cssStyle);
 
 function to_px(num) {
-  return Number(num) || 0;
+  const regMatch = String(num).match(/([0-9]*)([a-zA-Z]*)$/);
+  if (regMatch) {
+    let digits = regMatch[1];
+    const unit = regMatch[2];
+    switch (unit) {
+      case 'rem':
+        digits *= 16;
+        break;
+      case 'em':
+        digits *= 16;
+      default:
+        break;
+    }
+    return Number(digits);
+  }
+  return 0;
 }
 
 class StyleNode {
@@ -47,8 +62,9 @@ function styleTree(root, stylesheet) {
 
 function matchSimpleSelector(element, selector) {
   const result = {};
+  const classes = element.attributes.map((attr) => attr.value);
   for (let tagName in selector) {
-    if (tagName === element.tagName) {
+    if (tagName === element.tagName || classes.indexOf(tagName) !== -1) {
       const pairs = selector[tagName];
       for (const pair of pairs) {
         result[pair.name] = pair.value;
@@ -132,9 +148,19 @@ class LayoutBox {
   }
 
   calculate_block_height() {
+    // content area的height取决于内容的高度
+    const content = this.dimensions.content;
+    const node = this.node.node;
+    const { text } = node;
+    if (text) {
+      const textHeight = getTextHeight(text, content.width);
+      content.height += textHeight;
+    }
+
+    // 如果设定了高度，以高度为准
     const height = to_px(this.node.value('height'));
     if (height) {
-      this.dimensions.content.height = height;
+      content.height = height;
     }
   }
 
@@ -220,13 +246,6 @@ class LayoutBox {
 
   layout_block_children() {
     let d = this.dimensions;
-    const node = this.node.node;
-    // content area的height取决于内容的高度
-    const { text } = node;
-    if (text) {
-      const textHeight = getTextHeight(text, d.content.width);
-      d.content.height += textHeight;
-    }
     for (let child of this.children) {
       child.layout_block(d);
       d.content.height += child.dimensions.margin_box().height;

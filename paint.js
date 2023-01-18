@@ -23,7 +23,7 @@ function renderLayoutBox(box) {
   const dimensions = box.dimensions;
   const border_box = dimensions.border_box();
   const { x, y, height, width } = border_box;
-  const borderColor = get_specifiedValue(box, 'border') || 'none';
+  const borderColor = get_specifiedValue(box, 'border');
   const backgroundColor = get_specifiedValue(box, 'background') || 'white';
 
   console.log(x, y, width, height, borderColor, backgroundColor);
@@ -57,6 +57,7 @@ function renderTextBox(box) {
   const content_box = dimensions.content_box();
   const { x, y, height, width } = content_box;
   const color = get_specifiedValue(box, 'color') || 'black';
+  const textAlign = get_specifiedValue(box, 'textAlign') || 'left';
 
   const Text = new fabric.Textbox(text, {
     width,
@@ -64,6 +65,7 @@ function renderTextBox(box) {
     top: y,
     fill: color,
     fontSize: 20,
+    textAlign,
     splitByGrapheme: true, // 中文换行
   });
   const textSize = Text.calcTextHeight();
