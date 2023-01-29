@@ -57,7 +57,7 @@ function renderTextBox(box) {
   const content_box = dimensions.content_box();
   const { x, y, height, width } = content_box;
   const color = get_specifiedValue(box, 'color') || 'black';
-  const textAlign = get_specifiedValue(box, 'textAlign') || 'left';
+  const textAlign = get_specifiedValue(box, 'text-align') || 'left';
 
   const Text = new fabric.Textbox(text, {
     width,

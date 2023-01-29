@@ -94,9 +94,15 @@ function htmlParser(str) {
         },
         onAttribute(token) {
             const [name, value] = token.value.split("=");
+            let attrValue = value.replace(/^['"]/, "").replace(/['"]$/, "");
+            if(name === 'class') {
+                attrValue = '.' + attrValue;
+            } else if(name === 'id') {
+                attrValue = '#' + attrValue;
+            }
             curParent.attributes.push({
                 name,
-                value: value.replace(/^['"]/, "").replace(/['"]$/, ""),
+                value: attrValue,
             });
         },
         onEndTag(token) {

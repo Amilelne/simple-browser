@@ -1,4 +1,5 @@
-const cssParser = require('./cssParser/parse.js');
+// const cssParser = require('./cssParser/parse.js');
+const cssParser = require('./cssParser/index.js');
 const htmlParser = require('./htmlParser/parse.js');
 const paint = require('./paint.js');
 const fs = require('fs');
@@ -10,8 +11,6 @@ const css = fs.readFileSync('./input/main.css', 'utf-8');
 
 const htmlNode = htmlParser(html);
 const cssStyle = cssParser(css);
-
-console.log(htmlNode, cssStyle);
 
 function to_px(num) {
   const regMatch = String(num).match(/([0-9]*)([a-zA-Z]*)$/);
@@ -62,19 +61,37 @@ function styleTree(root, stylesheet) {
 
 function matchSimpleSelector(element, selector) {
   const result = {};
-  const classes = element.attributes.map((attr) => attr.value);
-  for (let tagName in selector) {
-    if (tagName === element.tagName || classes.indexOf(tagName) !== -1) {
-      const pairs = selector[tagName];
-      for (const pair of pairs) {
-        result[pair.name] = pair.value;
+  const attributes = element.attributes.map((attr) => attr.value);
+  // for (let tagName in selector) {
+  //   if (tagName === element.tagName || classes.indexOf(tagName) !== -1) {
+  //     const pairs = selector[tagName];
+  //     for (const pair of pairs) {
+  //       result[pair.name] = pair.value;
+  //     }
+  //   }
+  // }
+  for (const rule of selector) {
+    // 匹配tagName的样式
+    if (rule.selectors.includes(element.tagName)) {
+      for (const declaration of rule.declarations) {
+        result[declaration.property] = declaration.value;
+      }
+    } else {
+      // 匹配attributes的样式
+      for (const attribute of attributes) {
+        if (rule.selectors.includes(attribute)) {
+          for (const declaration of rule.declarations) {
+            result[declaration.property] = declaration.value;
+          }
+        }
       }
     }
   }
+
   return result;
 }
 
-const style_root = styleTree(htmlNode, cssStyle);
+const style_root = styleTree(htmlNode, cssStyle.stylesheet.rules);
 
 class Dimensions {
   constructor(

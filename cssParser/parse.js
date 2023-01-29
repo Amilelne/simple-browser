@@ -1,5 +1,5 @@
 const nmstart = "[_a-zA-Z]";
-const nmchar = "[_a-z0-9A-Z]";
+const nmchar = "[_a-z0-9A-Z\-]";
 const name = new RegExp(`^${nmchar}+`);
 const ident = new RegExp(`^${nmstart}${nmchar}*`);
 const identList = new RegExp(`^(${nmstart}${nmchar}*)(,${nmstart}${nmchar}*)+`);

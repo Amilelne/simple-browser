@@ -4,6 +4,7 @@
   "description": "#### 介绍",
   "main": "index.js",
   "scripts": {
+    "start": "node style.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
