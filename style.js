@@ -6,14 +6,15 @@ const fs = require('fs');
 const { Width, Height, LineHeight } = require('./const.js');
 const getTextHeight = require('./utils/getTextHeight');
 
-const html = fs.readFileSync('./input/index.html', 'utf-8');
-const css = fs.readFileSync('./input/main.css', 'utf-8');
+// const html = fs.readFileSync('./input/index.html', 'utf-8');
+// const css = fs.readFileSync('./input/main.css', 'utf-8');
+const { html, css } = require('./input/index.js');
 
 const htmlNode = htmlParser(html);
 const cssStyle = cssParser(css);
 
 function to_px(num) {
-  const regMatch = String(num).match(/([0-9]*)([a-zA-Z]*)$/);
+  const regMatch = String(num).match(/([0-9]+)([a-zA-Z]*)$/);
   if (regMatch) {
     let digits = regMatch[1];
     const unit = regMatch[2];
@@ -59,29 +60,41 @@ function styleTree(root, stylesheet) {
   );
 }
 
+function dealWithValue(property, value) {
+  let unitValue = value;
+  const arrays = ['font-size', 'width', 'height', 'margin', 'padding'];
+  const origins = ['margin', 'padding', 'border'];
+  const directions = ['top', 'right', 'bottom', 'left'];
+  origins.forEach((origin) => {
+    directions.forEach((direction) => arrays.push(origin + '-' + direction));
+  });
+  if (arrays.includes(property)) {
+    unitValue = to_px(value);
+  }
+  return unitValue;
+}
+
 function matchSimpleSelector(element, selector) {
   const result = {};
   const attributes = element.attributes.map((attr) => attr.value);
-  // for (let tagName in selector) {
-  //   if (tagName === element.tagName || classes.indexOf(tagName) !== -1) {
-  //     const pairs = selector[tagName];
-  //     for (const pair of pairs) {
-  //       result[pair.name] = pair.value;
-  //     }
-  //   }
-  // }
   for (const rule of selector) {
     // 匹配tagName的样式
     if (rule.selectors.includes(element.tagName)) {
       for (const declaration of rule.declarations) {
-        result[declaration.property] = declaration.value;
+        result[declaration.property] = dealWithValue(
+          declaration.property,
+          declaration.value
+        );
       }
     } else {
       // 匹配attributes的样式
       for (const attribute of attributes) {
         if (rule.selectors.includes(attribute)) {
           for (const declaration of rule.declarations) {
-            result[declaration.property] = declaration.value;
+            result[declaration.property] = dealWithValue(
+              declaration.property,
+              declaration.value
+            );
           }
         }
       }
@@ -170,12 +183,16 @@ class LayoutBox {
     const node = this.node.node;
     const { text } = node;
     if (text) {
-      const textHeight = getTextHeight(text, content.width);
+      const textHeight = getTextHeight(
+        text,
+        content.width,
+        this.node.value('font-size')
+      );
       content.height += textHeight;
     }
 
     // 如果设定了高度，以高度为准
-    const height = to_px(this.node.value('height'));
+    const height = this.node.value('height');
     if (height) {
       content.height = height;
     }
@@ -184,16 +201,16 @@ class LayoutBox {
   calculate_block_width(containing_block) {
     let style = this.node;
 
-    let width = to_px(style.lookup('width')) || 'auto';
+    let width = style.lookup('width') || 'auto';
 
-    let margin_left = to_px(style.lookup('margin-left', 'margin', 0));
-    let margin_right = to_px(style.lookup('margin-right', 'margin', 0));
+    let margin_left = style.lookup('margin-left', 'margin', 0);
+    let margin_right = style.lookup('margin-right', 'margin', 0);
 
-    let border_left = to_px(style.lookup('border-left', 'border', 0));
-    let border_right = to_px(style.lookup('border-right', 'border', 0));
+    let border_left = style.lookup('border-left', 'border', 0);
+    let border_right = style.lookup('border-right', 'border', 0);
 
-    let padding_left = to_px(style.lookup('padding-left', 'padding', 0));
-    let padding_right = to_px(style.lookup('padding-right', 'padding', 0));
+    let padding_left = style.lookup('padding-left', 'padding', 0);
+    let padding_right = style.lookup('padding-right', 'padding', 0);
 
     let total =
       to_px(width) +
@@ -224,7 +241,7 @@ class LayoutBox {
     }
 
     let d = this.dimensions;
-    d.content.width = to_px(width);
+    d.content.width = width;
 
     d.margin.left = margin_left;
     d.margin.right = margin_right;
@@ -238,14 +255,14 @@ class LayoutBox {
     let style = this.node;
     let d = this.dimensions;
 
-    d.margin.top = to_px(style.lookup('margin-top', 'margin', 0));
-    d.margin.bottom = to_px(style.lookup('margin-bottom', 'margin', 0));
+    d.margin.top = style.lookup('margin-top', 'margin', 0);
+    d.margin.bottom = style.lookup('margin-bottom', 'margin', 0);
 
-    d.border.top = to_px(style.lookup('border-top', 'border', 0));
-    d.border.bottom = to_px(style.lookup('border-bottom', 'border', 0));
+    d.border.top = style.lookup('border-top', 'border', 0);
+    d.border.bottom = style.lookup('border-bottom', 'border', 0);
 
-    d.padding.top = to_px(style.lookup('padding-top', 'padding', 0));
-    d.padding.bottom = to_px(style.lookup('padding-bottom', 'padding', 0));
+    d.padding.top = style.lookup('padding-top', 'padding', 0);
+    d.padding.bottom = style.lookup('padding-bottom', 'padding', 0);
 
     d.content.x =
       containing_block.content.x +

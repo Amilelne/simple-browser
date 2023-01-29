@@ -58,18 +58,17 @@ function renderTextBox(box) {
   const { x, y, height, width } = content_box;
   const color = get_specifiedValue(box, 'color') || 'black';
   const textAlign = get_specifiedValue(box, 'text-align') || 'left';
+  const fontSize = get_specifiedValue(box, 'font-size') || 16;
 
   const Text = new fabric.Textbox(text, {
     width,
     left: x,
     top: y,
     fill: color,
-    fontSize: 20,
+    fontSize,
     textAlign,
     splitByGrapheme: true, // 中文换行
   });
-  const textSize = Text.calcTextHeight();
-  console.log('textSize 2:', textSize);
   canvas.add(Text);
 }
 
