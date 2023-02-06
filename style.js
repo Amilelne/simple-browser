@@ -1,16 +1,17 @@
 // const cssParser = require('./cssParser/parse.js');
 const cssParser = require('./cssParser/index.js');
-const htmlParser = require('./htmlParser/parse.js');
+// const htmlParser = require('./htmlParser/parse.js');
+const { parse } = require('node-html-parser');
 const paint = require('./paint.js');
 const fs = require('fs');
 const { Width, Height, LineHeight } = require('./const.js');
 const getTextHeight = require('./utils/getTextHeight');
+const dealWithHtml = require('./utils/dealWithHtml');
 
-// const html = fs.readFileSync('./input/index.html', 'utf-8');
-// const css = fs.readFileSync('./input/main.css', 'utf-8');
-const { html, css } = require('./input/index.js');
+let { html, css } = require('./input/index.js');
 
-const htmlNode = htmlParser(html);
+html = dealWithHtml(html);
+const htmlNode = parse(html);
 const cssStyle = cssParser(css);
 
 function to_px(num) {
@@ -49,13 +50,14 @@ class StyleNode {
 }
 
 function styleTree(root, stylesheet) {
-  if (!root) return;
-  return root.map(
+  if (!root) return [];
+  const filtered = root.filter((node) => node.nodeType === 1);
+  return filtered.map(
     (node) =>
       new StyleNode(
         node,
         matchSimpleSelector(node, stylesheet),
-        styleTree(node.children, stylesheet)
+        styleTree(node.childNodes, stylesheet)
       )
   );
 }
@@ -76,10 +78,10 @@ function dealWithValue(property, value) {
 
 function matchSimpleSelector(element, selector) {
   const result = {};
-  const attributes = element.attributes.map((attr) => attr.value);
+  const attributes = element.attributes;
   for (const rule of selector) {
     // 匹配tagName的样式
-    if (rule.selectors.includes(element.tagName)) {
+    if (rule.selectors.includes(element.tagName.toLowerCase())) {
       for (const declaration of rule.declarations) {
         result[declaration.property] = dealWithValue(
           declaration.property,
@@ -87,9 +89,9 @@ function matchSimpleSelector(element, selector) {
         );
       }
     } else {
-      // 匹配attributes的样式
-      for (const attribute of attributes) {
-        if (rule.selectors.includes(attribute)) {
+      // 匹配class
+      for (const cls of element.classList.value) {
+        if (rule.selectors.includes(`.${cls}`)) {
           for (const declaration of rule.declarations) {
             result[declaration.property] = dealWithValue(
               declaration.property,
@@ -98,13 +100,20 @@ function matchSimpleSelector(element, selector) {
           }
         }
       }
+      // 匹配id
+      if (rule.selectors.includes(`#${element.id}`)) {
+        result[declaration.property] = dealWithValue(
+          declaration.property,
+          declaration.value
+        );
+      }
     }
   }
 
   return result;
 }
 
-const style_root = styleTree(htmlNode, cssStyle.stylesheet.rules);
+const style_root = styleTree(htmlNode.childNodes, cssStyle.stylesheet.rules);
 
 class Dimensions {
   constructor(
@@ -180,8 +189,7 @@ class LayoutBox {
   calculate_block_height() {
     // content area的height取决于内容的高度
     const content = this.dimensions.content;
-    const node = this.node.node;
-    const { text } = node;
+    const text = this.node.node.innerText;
     if (text) {
       const textHeight = getTextHeight(
         text,
